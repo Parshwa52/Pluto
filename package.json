@@ -3,9 +3,31 @@
   "version": "1.0.0",
   "description": "Pluto Backend Efficient System",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@biconomy/mexa": "^2.0.28",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "eth-sig-util": "^2.5.2",
+    "express": "^4.18.2",
+    "express-ipfilter": "^1.3.1",
+    "express-rate-limit": "^7.1.5",
+    "express-rate-limiter": "^1.3.1",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "node-cron": "^3.0.3",
+    "web3": "^1.2.5-rc.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.6",
+    "@babel/preset-env": "^7.23.6"
+  }
 }
