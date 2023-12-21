@@ -23,7 +23,7 @@ const { API_URL, PRIVATE_KEY, BICONOMY_API_KEY } = process.env;
 let web3;
 let contract;
 const POLYGON_MUMBAI_NETWORK_ID = 80001;
-const QUEUE_EXECUTION_LIMIT = 2;
+const QUEUE_EXECUTION_LIMIT = 100;
 let IN_EXECUTION = false;
 
 //In memory Queue on server
