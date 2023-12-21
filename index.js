@@ -69,6 +69,12 @@ app.get("/", function (req, res) {
   res.send("Welcome to Pluto!");
 });
 
+app.get("/cron", function (req, res) {
+  if (IN_EXECUTION === false) {
+    processQueue();
+  }
+});
+
 //2. Post transaction request
 app.post("/api", async (req, res) => {
   let address = req.body.address;
@@ -127,12 +133,12 @@ async function processQueue() {
 }
 
 //Added a cron job which runs every 10 seconds to process queue if it has QUEUE_EXECUTION_LIMIT requests
-cron.schedule("*/10 * * * * *", () => {
-  //Execute this cron job only when previous job has completed execution
-  if (IN_EXECUTION === false) {
-    processQueue();
-  }
-});
+// cron.schedule("*/10 * * * * *", () => {
+//   //Execute this cron job only when previous job has completed execution
+//   if (IN_EXECUTION === false) {
+//     processQueue();
+//   }
+// });
 
 function resultLogger(result, userAddress) {
   if (result.transactionHash) {
