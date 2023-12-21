@@ -2,7 +2,7 @@
 
 A backend system to handle a large number of meta transactions using Blockchain and Node.js
 
-### Overview
+## Overview
 
 Pluto is a scalable blockchain based meta transaction system for users. It allows large number of users to claim their 10 ERC20 Plutokens from server without paying any gas fees.
 
@@ -47,11 +47,11 @@ The errors are constantly monitored for each and every request on render.com das
 
 ## Security
 
-### Ddos Mitigation
+### Secure Communication
 
 The communication is done via HTTPS/TLS.
 
-### Security Middlewares Added
+### Ddos Mitigation
 
 1. IP Block Filter
 2. Rate Limiter - 1 million request/ minute limit
