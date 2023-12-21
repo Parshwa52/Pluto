@@ -19,13 +19,15 @@ import rateLimitMiddleware from "./rateLimiter.js";
 dotenv.config();
 const { API_URL, PRIVATE_KEY, BICONOMY_API_KEY } = process.env;
 
-//Declare variables
+//Declare variables and constants
 let web3;
 let contract;
 const POLYGON_MUMBAI_NETWORK_ID = 80001;
+const QUEUE_EXECUTION_LIMIT = 2;
+let IN_EXECUTION = false;
 
 //In memory Queue on server
-let queue = [];
+let jobQueue = [];
 
 //Setup domain data for Biconomy Meta Transactions
 let domainData = {
@@ -39,7 +41,7 @@ let domainData = {
 const app = express();
 
 //Express Middlewares
-//List of blacklist IPs
+//List of blacklist IPs to block
 const blackList = ["192.168.0.138"];
 
 //Add CORS Middleware
@@ -69,10 +71,18 @@ app.get("/", function (req, res) {
 
 //2. Post transaction request
 app.post("/api", async (req, res) => {
-  queue.push(req.body.address);
-  res.send({
-    status: "Request queued",
-  });
+  let address = req.body.address;
+  //If valid address is there
+  if (address.length === 42) {
+    jobQueue.push(req.body.address);
+    res.send({
+      status: "Request queued. You will get onboarding tokens in some time.",
+    });
+  } else {
+    res.send({
+      status: "Invalid Address",
+    });
+  }
 });
 
 //Server Starting with Biconomy Dapp Initialization
@@ -104,29 +114,52 @@ async function init() {
 }
 
 async function processQueue() {
-  let len = queue.length;
-  console.log("Current queue length is", len);
-  if (len == 2) {
-    for (let i = 0; i < len; i++) {
-      console.log("queue=", queue);
-      const result = await processTransaction(
-        web3,
-        contract,
-        queue[i],
-        domainData
-      );
-      if (result.transactionHash) {
-        console.log("Transaction Success");
-      } else {
-        console.log("Transaction Failed");
-      }
-    }
-    queue = [];
+  let len = jobQueue.length;
+  console.log("Current job queue length is", len);
+
+  //Creating a separate queue just for execution
+  let executionQueue = JSON.parse(JSON.stringify(jobQueue));
+
+  if (len >= QUEUE_EXECUTION_LIMIT) {
+    queueExecutor(len, executionQueue);
   }
   console.log("Cron job executed at:", new Date().toLocaleString());
 }
-cron.schedule("* * * * *", () => {
-  processQueue();
+
+//Added a cron job which runs every 10 seconds to process queue if it has QUEUE_EXECUTION_LIMIT requests
+cron.schedule("*/10 * * * * *", () => {
+  //Execute this cron job only when previous job has completed execution
+  if (IN_EXECUTION === false) {
+    processQueue();
+  }
 });
+
+function resultLogger(result, userAddress) {
+  if (result.transactionHash) {
+    console.log(
+      `${new Date().toLocaleString()} Transaction Success for address ${userAddress}`
+    );
+  } else {
+    console.log(
+      `${new Date().toLocaleString()} Transaction Failed for address ${userAddress}`
+    );
+  }
+}
+
+async function queueExecutor(len, executionQueue) {
+  IN_EXECUTION = true;
+  for (let i = 0; i < len; i++) {
+    const result = await processTransaction(
+      web3,
+      contract,
+      executionQueue[i],
+      domainData
+    );
+    resultLogger(result, executionQueue[i]);
+  }
+  executionQueue = [];
+  jobQueue.splice(0, QUEUE_EXECUTION_LIMIT);
+  IN_EXECUTION = false;
+}
 
 export default app;
